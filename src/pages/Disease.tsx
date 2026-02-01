@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Upload, Leaf, Loader2, AlertTriangle, CheckCircle, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PredictionResult {
   filename: string;
@@ -39,20 +40,32 @@ const Disease = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://127.0.0.1:8000/crop/detect", {
-        method: "POST",
-        body: formData,
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/crop-detect`,
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
 
-      if (!response.ok) throw new Error("Detection failed");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Detection failed");
+      }
 
       const data = await response.json();
       setResult({
         filename: data.filename || file.name,
-        prediction: data.prediction || data.disease || data.result || JSON.stringify(data),
+        prediction: data.prediction || "Unable to analyze image",
       });
     } catch (err) {
-      setError("Failed to analyze image. Please ensure the API server is running.");
+      const errorMessage = err instanceof Error ? err.message : "Failed to analyze image";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
