@@ -1,11 +1,13 @@
 import { useState, useRef } from "react";
-import { Upload, Leaf, Loader2, AlertTriangle, CheckCircle, ImageIcon } from "lucide-react";
+import { Upload, Leaf, Loader2, AlertTriangle, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import DiseaseResultCard from "@/components/DiseaseResultCard";
 
 interface PredictionResult {
   filename: string;
   prediction: string;
+  timestamp: Date;
 }
 
 const Disease = () => {
@@ -62,6 +64,7 @@ const Disease = () => {
       setResult({
         filename: data.filename || file.name,
         prediction: data.prediction || "Unable to analyze image",
+        timestamp: new Date(),
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to analyze image";
@@ -173,26 +176,13 @@ const Disease = () => {
         </div>
       )}
 
-      {result && (
-        <div className="mt-6 p-6 rounded-2xl bg-card border border-border shadow-soft animate-fade-in">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <CheckCircle className="h-5 w-5 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground">Analysis Complete</h3>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-border">
-              <span className="text-muted-foreground">File</span>
-              <span className="font-medium text-foreground">{result.filename}</span>
-            </div>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-muted-foreground">Prediction</span>
-              <span className="font-semibold text-primary">{result.prediction}</span>
-            </div>
-          </div>
-        </div>
+      {result && preview && (
+        <DiseaseResultCard
+          imagePreview={preview}
+          filename={result.filename}
+          prediction={result.prediction}
+          timestamp={result.timestamp}
+        />
       )}
     </div>
   );

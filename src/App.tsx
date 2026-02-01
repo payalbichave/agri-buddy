@@ -9,6 +9,7 @@ import Chat from "./pages/Chat";
 import Disease from "./pages/Disease";
 import Weather from "./pages/Weather";
 import Market from "./pages/Market";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/disease" element={<Disease />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/market" element={<Market />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
